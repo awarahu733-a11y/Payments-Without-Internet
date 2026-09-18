@@ -1,14 +1,12 @@
-name: Build Flowpay APK
+name: Build Flowpay Debug APK
 
 on:
   push:
     branches: [ main, master ]
-  pull_request:
-    branches: [ main, master ]
   workflow_dispatch:
 
 jobs:
-  build:
+  build-apk:
     runs-on: ubuntu-latest
 
     steps:
@@ -22,26 +20,22 @@ jobs:
           distribution: 'temurin'
           cache: gradle
 
-      - name: Setup Android SDK
-        uses: android-actions/setup-android@v3
-
       - name: Grant execute permission to gradlew
         run: chmod +x gradlew
 
       - name: Create local.properties
         run: echo "sdk.dir=$ANDROID_HOME" > local.properties
 
-      - name: Build Debug APK
-        run: ./gradlew assembleDebug --no-daemon --stacktrace
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
 
-      - name: Upload APK as Artifact
+      - name: Build Debug APK
+        run: ./gradlew assembleDebug --no-daemon
+
+      - name: Upload Debug APK
         uses: actions/upload-artifact@v4
         with:
           name: flowpay-debug-apk
-          path: app/build/outputs/apk/debug/*.apk
+          path: app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
           retention-days: 7
-
-      - name: Show APK info
-        run: |
-          echo "Build successful!"
-          ls -lh app/build/outputs/apk/debug/
